@@ -16,6 +16,11 @@ class GithubLoginEngine(LoginEngineBase):
         self.session_url = 'https://github.com/session'
         super(GithubLoginEngine, self).__init__()
 
+    def get_token(self):
+        response = self.session.get(url=self.login_url, headers=self.headers)
+        print("%s -> %s" % (self.login_url, response.status_code))
+        return self.parse(response.text)
+
     def parse(self, text: str):
         selector = etree.HTML(text)
         return selector.xpath('//*[@name="authenticity_token"]/@value')
@@ -23,7 +28,7 @@ class GithubLoginEngine(LoginEngineBase):
     def login(self, username, password):
         response = self.session.get(url=self.login_url, headers=self.headers)
         print("%s -> %s" % (self.login_url, response.status_code))
-        authenticity_token = self.parse(response.text)
+        authenticity_token = self.get_token()
         form_data = {
             'commit': 'Sign in',
             'utf8': '✓',
